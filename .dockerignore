@@ -1,0 +1,20 @@
+# Dependencies and virtual environments
+**/node_modules
+**/venv
+**/.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+**/dist
+**/build
+.DS_Store
+
+# Version control
+.git
+.gitignore
+
+# Environment secrets
+.env.local

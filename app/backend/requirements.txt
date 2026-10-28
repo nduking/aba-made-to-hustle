@@ -1,0 +1,13 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.34
+psycopg2-binary==2.9.9
+imapclient==2.3.1
+aiosmtplib==2.0.2
+apscheduler==3.10.4
+pywebpush==1.14.0
+icalendar==5.0.12
+python-jose==3.3.0
+python-dotenv==1.0.1
+passlib[bcrypt]==1.7.4
+cryptography==43.0.1
