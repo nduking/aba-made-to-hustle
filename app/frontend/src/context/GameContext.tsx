@@ -21,11 +21,11 @@ interface GameContextType {
   activeScenario: ScenarioEvent | null;
   selectedContact: Contact | null;
   showPhone: boolean;
-  activePhoneApp: 'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle';
+  activePhoneApp: 'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle' | 'maps';
   
   // Actions
   togglePhone: () => void;
-  setActivePhoneApp: (app: 'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle') => void;
+  setActivePhoneApp: (app: 'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle' | 'maps') => void;
   openModal: (modalId: string) => void;
   closeModal: () => void;
   openScenario: (scenario: ScenarioEvent) => void;
@@ -45,6 +45,8 @@ interface GameContextType {
   transferMoney: (targetPublicId: string, amount: number) => { success: boolean; message: string };
   toggleWeather: () => void;
   eatStreetFood: (cost: number, energyBoost: number) => void;
+  sleepAndAdvanceDay: () => { dayNumber: number; eventsTriggered: string[] };
+  purchaseRetailItem: (itemName: string, cost: number, category: string) => boolean;
 }
 
 const STORAGE_KEY = 'aba_game_state_v3';
@@ -154,7 +156,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [activeScenario, setActiveScenario] = useState<ScenarioEvent | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(INITIAL_CONTACTS[0]);
   const [showPhone, setShowPhone] = useState(false);
-  const [activePhoneApp, setActivePhoneApp] = useState<'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle'>('planner');
+  const [activePhoneApp, setActivePhoneApp] = useState<'messages' | 'bank' | 'jobs' | 'planner' | 'lifestyle' | 'maps'>('planner');
 
   // Persist player changes
   useEffect(() => {
@@ -606,6 +608,100 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return { success: true, message: `Successfully transferred $${amount.toLocaleString()} to ${targetPublicId}` };
   };
 
+  // Sleep & Advance Day (F03, §6.12)
+  const sleepAndAdvanceDay = (): { dayNumber: number; eventsTriggered: string[] } => {
+    const eventsTriggered: string[] = [];
+    const nextDay = cityTime.dayNumber + 1;
+
+    // Advance clock to next day 06:00 AM
+    setCityTime(prev => ({
+      ...prev,
+      hour: 6,
+      minute: 0,
+      dayNumber: nextDay,
+      period: 'MORNING' as const,
+      isRaining: Math.random() < 0.25 // 25% chance of morning rain
+    }));
+
+    // Restore player state overnight
+    setPlayer(prev => {
+      const newEnergy = Math.min(100, prev.energy + 50);
+      const newHunger = Math.min(100, prev.hunger + 20); // gets hungrier overnight
+      const newHealth = Math.min(100, prev.health + (prev.health < 30 ? 15 : 5));
+      const newVitality = Math.round((newEnergy + (100 - newHunger) + newHealth) / 3);
+
+      // Credit a consumer stipend if not already max stacked
+      let newStipends = prev.unclaimedStipends;
+      if (newStipends < 3) {
+        newStipends += 1;
+        eventsTriggered.push('Consumer Income credited (+$50,000 available)');
+      }
+
+      // Reset daily coin counter
+      eventsTriggered.push(`Day ${nextDay} begins — energy restored to ${newEnergy}%`);
+
+      return {
+        ...prev,
+        energy: newEnergy,
+        hunger: newHunger,
+        health: newHealth,
+        vitality: newVitality,
+        dailyCoinsEarned: 0,
+        unclaimedStipends: newStipends
+      };
+    });
+
+    // Add overnight ledger entry
+    const sleepEntry: LedgerEntry = {
+      id: 'tx_sleep_' + Date.now(),
+      txId: 'TX-SLEEP-' + nextDay,
+      timestamp: `Day ${nextDay}, 06:00`,
+      account: 'CASH',
+      delta: 0,
+      reason: `Overnight rest — Day ${nextDay} begins`,
+      refType: 'GRANT'
+    };
+    setLedger(prev => [sleepEntry, ...prev]);
+
+    sound.cash();
+    return { dayNumber: nextDay, eventsTriggered };
+  };
+
+  // Consumer Retail Purchase (F20)
+  const purchaseRetailItem = (itemName: string, cost: number, category: string): boolean => {
+    // Try consumer income bucket first, then earned, then cash
+    if (player.cash < cost && player.restrictedBuckets.consumerIncome < cost) {
+      return false;
+    }
+
+    sound.cash();
+    setPlayer(prev => {
+      // Prefer consumer income bucket for purchases
+      if (prev.restrictedBuckets.consumerIncome >= cost) {
+        return {
+          ...prev,
+          restrictedBuckets: {
+            ...prev.restrictedBuckets,
+            consumerIncome: prev.restrictedBuckets.consumerIncome - cost
+          }
+        };
+      }
+      return { ...prev, cash: prev.cash - cost };
+    });
+
+    const entry: LedgerEntry = {
+      id: 'tx_purchase_' + Date.now(),
+      txId: 'TX-BUY-' + Math.floor(1000 + Math.random() * 9000),
+      timestamp: `Day ${cityTime.dayNumber}, ${String(cityTime.hour).padStart(2, '0')}:${String(cityTime.minute).padStart(2, '0')}`,
+      account: 'CASH',
+      delta: -cost,
+      reason: `Purchased ${itemName} (${category})`,
+      refType: 'FOOD'
+    };
+    setLedger(prev => [entry, ...prev]);
+    return true;
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -637,7 +733,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         seekMedicalCare,
         transferMoney,
         toggleWeather,
-        eatStreetFood
+        eatStreetFood,
+        sleepAndAdvanceDay,
+        purchaseRetailItem
       }}
     >
       {children}

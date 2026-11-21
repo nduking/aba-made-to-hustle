@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   MapPin,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  Home
 } from 'lucide-react';
 import { SCENARIO_EVENTS } from '../data/mockData';
 import { AnimatedStreetScene } from './AnimatedStreetScene';
@@ -210,6 +211,18 @@ export const CityHUD: React.FC = () => {
           <div>
             <div style={{ fontWeight: 700, fontSize: '12px' }}>Faulks Community Clinic (F16)</div>
             <div style={{ fontSize: '10px', color: 'var(--on-surface-muted)' }}>Emergency triage & health recharge</div>
+          </div>
+        </button>
+
+        <button 
+          onClick={() => openModal('home')}
+          className="btn-secondary"
+          style={{ padding: '10px 14px', justifyContent: 'flex-start', textAlign: 'left', background: 'var(--surface-high)' }}
+        >
+          <Home size={16} style={{ color: 'var(--primary)' }} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '12px' }}>Starter Home & Rest (F03)</div>
+            <div style={{ fontSize: '10px', color: 'var(--on-surface-muted)' }}>Sleep, recover energy & save state</div>
           </div>
         </button>
 

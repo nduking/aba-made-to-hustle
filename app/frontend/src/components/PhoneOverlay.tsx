@@ -8,16 +8,15 @@ import {
   BarChart3, 
   ShoppingBag, 
   Coins, 
-  Sparkles, 
   Send, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
   ShieldCheck, 
-  AlertCircle,
   TrendingUp,
   Search,
   CheckCircle2,
-  Clock
+  MapPin,
+  Navigation,
+  Truck,
+  Zap
 } from 'lucide-react';
 import { validatePublicId } from '../utils/playerId';
 import { WHOLESALE_CATALOG } from '../data/mockData';
@@ -39,7 +38,10 @@ export const PhoneOverlay: React.FC = () => {
     placeWholesaleOrder,
     sellStallItem,
     activateLifeEnhancer,
-    transferMoney
+    transferMoney,
+    completeApprenticeTask,
+    eatStreetFood,
+    purchaseRetailItem
   } = useGame();
 
   const [messageInput, setMessageInput] = useState('');
@@ -49,6 +51,9 @@ export const PhoneOverlay: React.FC = () => {
   const [searchIdInput, setSearchIdInput] = useState('');
   const [searchFeedback, setSearchFeedback] = useState<string | null>(null);
   const [activeTabPlanner, setActiveTabPlanner] = useState<'runway' | 'wholesale' | 'stall' | 'postmortem'>('runway');
+  const [kekeStatus, setKekeStatus] = useState<{ active: boolean; destination: string; progress: number } | null>(null);
+  const [kekeFeedback, setKekeFeedback] = useState<string | null>(null);
+  const [purchaseFeedback, setPurchaseFeedback] = useState<string | null>(null);
 
   if (!showPhone) return null;
 
@@ -628,7 +633,7 @@ export const PhoneOverlay: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
                   <span className="font-mono" style={{ color: 'var(--secondary)', fontWeight: 700 }}>+$4,500 • 30 XP</span>
                   <button 
-                    onClick={() => useGame().completeApprenticeTask("Crepe Sole Trimming", 4500, 30)}
+                    onClick={() => completeApprenticeTask("Crepe Sole Trimming", 4500, 30)}
                     className="btn-primary" 
                     style={{ padding: '6px 12px', fontSize: '11px' }}
                   >
@@ -645,7 +650,41 @@ export const PhoneOverlay: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
                   <span className="font-mono" style={{ color: 'var(--secondary)', fontWeight: 700 }}>+$3,000 • 20 XP</span>
                   <button 
-                    onClick={() => useGame().completeApprenticeTask("Keke Cargo Loading", 3000, 20)}
+                    onClick={() => completeApprenticeTask("Keke Cargo Loading", 3000, 20)}
+                    className="btn-primary" 
+                    style={{ padding: '6px 12px', fontSize: '11px' }}
+                  >
+                    Perform Task
+                  </button>
+                </div>
+              </div>
+
+              <div className="tactile-card" style={{ padding: '12px' }}>
+                <div style={{ fontWeight: 700, fontSize: '13px' }}>Mama Chinyere Food Stall: Morning Rush Delivery</div>
+                <div style={{ fontSize: '11px', color: 'var(--on-surface-muted)', margin: '4px 0' }}>
+                  Carry 6 wrapped Jollof & Goat Meat orders to market traders along Faulks Road.
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                  <span className="font-mono" style={{ color: 'var(--secondary)', fontWeight: 700 }}>+$6,000 • 15 XP</span>
+                  <button 
+                    onClick={() => completeApprenticeTask("Food Delivery Run", 6000, 15)}
+                    className="btn-primary" 
+                    style={{ padding: '6px 12px', fontSize: '11px' }}
+                  >
+                    Perform Task
+                  </button>
+                </div>
+              </div>
+
+              <div className="tactile-card" style={{ padding: '12px' }}>
+                <div style={{ fontWeight: 700, fontSize: '13px' }}>Pharmacy: Stock Inventory Count</div>
+                <div style={{ fontSize: '11px', color: 'var(--on-surface-muted)', margin: '4px 0' }}>
+                  Count and label medicines at the Faulks Road Health Centre pharmacy.
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                  <span className="font-mono" style={{ color: 'var(--secondary)', fontWeight: 700 }}>+$5,000 • 40 XP</span>
+                  <button 
+                    onClick={() => completeApprenticeTask("Pharmacy Inventory Count", 5000, 40)}
                     className="btn-primary" 
                     style={{ padding: '6px 12px', fontSize: '11px' }}
                   >
@@ -656,22 +695,175 @@ export const PhoneOverlay: React.FC = () => {
             </div>
           )}
 
-          {/* ================= APP 5: LIFESTYLE & CONSUMER TERMINAL (F20, §6.19) ================= */}
-          {activePhoneApp === 'lifestyle' && (
+          {/* ================= APP 5: MAPS & KEKE TRANSPORT (F04, F08, §6.9) ================= */}
+          {activePhoneApp === 'maps' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ background: 'var(--surface-low)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                {/* Stylised District Map SVG */}
+                <svg viewBox="0 0 340 200" width="100%" style={{ display: 'block' }}>
+                  <rect width="340" height="200" fill="#0d0e11" />
+                  {/* Road grid */}
+                  <rect x="0" y="90" width="340" height="20" fill="#1b1d24" />
+                  <rect x="100" y="0" width="16" height="200" fill="#1b1d24" />
+                  <rect x="220" y="0" width="16" height="200" fill="#1b1d24" />
+                  {/* Road markings */}
+                  <line x1="0" y1="100" x2="340" y2="100" stroke="#f59e0b" strokeWidth="1" strokeDasharray="12,8" opacity="0.4" />
+                  <line x1="108" y1="0" x2="108" y2="200" stroke="#f59e0b" strokeWidth="1" strokeDasharray="8,8" opacity="0.3" />
+                  <line x1="228" y1="0" x2="228" y2="200" stroke="#f59e0b" strokeWidth="1" strokeDasharray="8,8" opacity="0.3" />
+                  {/* District blocks */}
+                  <rect x="10" y="10" width="82" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  <rect x="124" y="10" width="88" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  <rect x="244" y="10" width="86" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  <rect x="10" y="118" width="82" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  <rect x="124" y="118" width="88" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  <rect x="244" y="118" width="86" height="72" rx="3" fill="#1f2128" stroke="#2a2f3d" strokeWidth="1" />
+                  {/* Landmarks */}
+                  <circle cx="52" cy="46" r="8" fill="#f59e0b" opacity="0.9" />
+                  <text x="52" y="50" textAnchor="middle" fill="#121316" fontSize="8" fontWeight="bold">🏪</text>
+                  <text x="52" y="68" textAnchor="middle" fill="#f59e0b" fontSize="7" fontWeight="bold">Stall #14B</text>
+                  <circle cx="168" cy="46" r="8" fill="#10b981" opacity="0.9" />
+                  <text x="168" y="50" textAnchor="middle" fill="#121316" fontSize="8">🏛</text>
+                  <text x="168" y="68" textAnchor="middle" fill="#10b981" fontSize="7">Ariaria Market</text>
+                  <circle cx="287" cy="46" r="8" fill="#ef4444" opacity="0.9" />
+                  <text x="287" y="50" textAnchor="middle" fill="#fff" fontSize="8">🏥</text>
+                  <text x="287" y="68" textAnchor="middle" fill="#ef4444" fontSize="7">Clinic</text>
+                  <circle cx="52" cy="154" r="8" fill="#8b5cf6" opacity="0.9" />
+                  <text x="52" y="158" textAnchor="middle" fill="#fff" fontSize="8">🏦</text>
+                  <text x="52" y="176" textAnchor="middle" fill="#8b5cf6" fontSize="7">Enyimba Bank</text>
+                  <circle cx="168" cy="154" r="8" fill="#f97316" opacity="0.9" />
+                  <text x="168" y="158" textAnchor="middle" fill="#fff" fontSize="8">🛺</text>
+                  <text x="168" y="176" textAnchor="middle" fill="#f97316" fontSize="7">Brass Junction</text>
+                  <circle cx="287" cy="154" r="8" fill="#fbbf24" opacity="0.9" />
+                  <text x="287" y="158" textAnchor="middle" fill="#121316" fontSize="8">🍲</text>
+                  <text x="287" y="176" textAnchor="middle" fill="#fbbf24" fontSize="7">Mama Chinyere</text>
+                  {/* Player location dot */}
+                  <circle cx="52" cy="46" r="14" fill="none" stroke="#f59e0b" strokeWidth="2" opacity="0.6">
+                    <animate attributeName="r" values="14;20;14" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />
+                  </circle>
+                  {/* Keke route line */}
+                  <polyline points="52,90 108,90 228,90 287,90" stroke="#f97316" strokeWidth="2" strokeDasharray="6,4" opacity="0.7" />
+                </svg>
+                <div style={{ padding: '6px 10px', fontSize: '10px', color: 'var(--on-surface-subtle)', fontFamily: 'var(--font-mono)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>📍 Faulks Road District — Day {/* cityTime not available here */}</span>
+                  <span style={{ color: 'var(--secondary)' }}>● Keke Route Active</span>
+                </div>
+              </div>
+
+              {/* Keke Route Dispatch */}
+              <div className="tactile-card" style={{ padding: '12px' }}>
+                <h4 style={{ fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Truck size={14} style={{ color: 'var(--tertiary)' }} />
+                  <span>Keke Napep Routes (F08)</span>
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {[
+                    { from: 'Stall #14B → Ariaria Market', fare: 1500, duration: '4 min', driver: 'Driver Chidi' },
+                    { from: 'Ariaria → Faulks Road Clinic', fare: 2000, duration: '6 min', driver: 'Driver Amaechi' },
+                    { from: 'Faulks Road → GRA', fare: 3000, duration: '10 min', driver: 'Driver Ngozi' },
+                    { from: 'Brass Junction → Nwosu Cobblers', fare: 1000, duration: '2 min', driver: 'Driver Chidi' },
+                  ].map((route, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-low)', padding: '8px', borderRadius: '4px' }}>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 700 }}>{route.from}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--on-surface-muted)' }}>{route.driver} • {route.duration}</div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (player.cash < route.fare) {
+                            setKekeFeedback(`Insufficient cash. Need $${route.fare.toLocaleString()}`);
+                            return;
+                          }
+                          setKekeStatus({ active: true, destination: route.from.split('→')[1].trim(), progress: 0 });
+                          setKekeFeedback(null);
+                          eatStreetFood(route.fare, 0); // deduct fare (reusing eat function for cash deduction)
+                          let p = 0;
+                          const interval = setInterval(() => {
+                            p += 20;
+                            setKekeStatus(prev => prev ? { ...prev, progress: p } : null);
+                            if (p >= 100) {
+                              clearInterval(interval);
+                              setKekeStatus(null);
+                              setKekeFeedback(`✅ Arrived at ${route.from.split('→')[1].trim()}`);
+                            }
+                          }, 600);
+                        }}
+                        className="btn-secondary"
+                        style={{ padding: '4px 10px', fontSize: '10px', whiteSpace: 'nowrap' }}
+                      >
+                        ${route.fare.toLocaleString()}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {kekeStatus && (
+                  <div style={{ marginTop: '10px', background: 'var(--surface-low)', padding: '10px', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--tertiary)', marginBottom: '6px' }}>🛺 En route to {kekeStatus.destination}...</div>
+                    <div style={{ height: '6px', background: 'var(--surface-high)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ width: `${kekeStatus.progress}%`, height: '100%', background: 'var(--tertiary)', transition: 'width 0.5s' }} />
+                    </div>
+                  </div>
+                )}
+                {kekeFeedback && (
+                  <div style={{ marginTop: '8px', fontSize: '11px', color: kekeFeedback.startsWith('✅') ? 'var(--secondary)' : 'var(--error)' }}>
+                    {kekeFeedback}
+                  </div>
+                )}
+              </div>
+
+              {/* Street Food Quick Buy (F09) */}
+              <div className="tactile-card" style={{ padding: '12px' }}>
+                <h4 style={{ fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Zap size={14} style={{ color: 'var(--primary)' }} />
+                  <span>Mama Chinyere Quick Menu (F09)</span>
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {[
+                    { item: 'Jollof Rice & Goat Meat', cost: 2500, energy: 30, desc: 'Full belly — restores energy fast' },
+                    { item: 'Agege Bread & Egg Sauce', cost: 1200, energy: 18, desc: 'Quick breakfast on the go' },
+                    { item: 'Suya Skewer x2', cost: 1800, energy: 22, desc: 'Spicy protein hit for afternoon hustle' },
+                    { item: 'Cold Malt & Chin-Chin', cost: 800, energy: 10, desc: 'Light snack, mood booster' },
+                  ].map((food, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-low)', padding: '8px', borderRadius: '4px' }}>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 700 }}>{food.item}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--on-surface-muted)' }}>{food.desc} • +{food.energy}% energy</div>
+                      </div>
+                      <button
+                        onClick={() => eatStreetFood(food.cost, food.energy)}
+                        className="btn-primary"
+                        style={{ padding: '4px 10px', fontSize: '10px', whiteSpace: 'nowrap' }}
+                      >
+                        ${food.cost.toLocaleString()}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= APP 6: LIFESTYLE & CONSUMER TERMINAL (F20, §6.19) ================= */}
+          {activePhoneApp === 'lifestyle' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Civilian Living Stipend Claim Terminal */}
-              <div className="tactile-card" style={{ padding: '14px', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(16, 185, 129, 0.1))' }}>
+              <div className="tactile-card" style={{ padding: '14px', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.12))' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <span className="badge-sku">CONSUMER INCOME TERMINAL (D16)</span>
                   <span className="font-mono" style={{ fontSize: '11px', color: 'var(--secondary)' }}>
                     {player.unclaimedStipends} Unclaimed
                   </span>
                 </div>
-                <h3 className="font-mono" style={{ fontSize: '20px', color: 'var(--primary)' }}>
-                  $50,000 / PERIOD
-                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <h3 className="font-mono" style={{ fontSize: '20px', color: 'var(--primary)' }}>
+                    $50,000 / PERIOD
+                  </h3>
+                  <div className="font-mono" style={{ fontSize: '11px', color: 'var(--on-surface-muted)' }}>
+                    Wallet: <strong style={{ color: 'var(--secondary)' }}>${player.restrictedBuckets.consumerIncome.toLocaleString()}</strong>
+                  </div>
+                </div>
                 <p style={{ fontSize: '11px', color: 'var(--on-surface-muted)', margin: '6px 0 10px' }}>
-                  Civilian living allowance credited into restricted Consumer Income bucket. Stackable up to 3 periods.
+                  Restricted civilian living allowance. Spendable at retail stalls, street food vendors, transport, and clinics. Non-transferable.
                 </p>
                 <button
                   onClick={claimConsumerStipend}
@@ -679,19 +871,144 @@ export const PhoneOverlay: React.FC = () => {
                   className="btn-emerald"
                   style={{ width: '100%', padding: '10px', opacity: player.unclaimedStipends > 0 ? 1 : 0.5 }}
                 >
-                  {player.unclaimedStipends > 0 ? 'Claim $50,000 Stipend' : 'Stipend Claimed (Next period in 24h)'}
+                  {player.unclaimedStipends > 0 ? 'Claim $50,000 Stipend' : 'Stipend Claimed (Next period in 24h or sleep)'}
                 </button>
               </div>
 
-              {/* Made in Aba Retail Showcase */}
+              {/* Purchase Feedback Notification */}
+              {purchaseFeedback && (
+                <div style={{
+                  background: purchaseFeedback.startsWith('Bought') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  border: `1px solid ${purchaseFeedback.startsWith('Bought') ? 'var(--secondary)' : 'var(--error)'}`,
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  fontSize: '11px',
+                  color: purchaseFeedback.startsWith('Bought') ? 'var(--secondary)' : 'var(--error)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <CheckCircle2 size={14} />
+                  <span>{purchaseFeedback}</span>
+                </div>
+              )}
+
+              {/* Made in Aba Retail Boutique */}
+              <div className="tactile-card" style={{ padding: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h4 style={{ fontSize: '12px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <ShoppingBag size={14} style={{ color: 'var(--primary)' }} />
+                    <span>Made-in-Aba Retail Boutique (F20)</span>
+                  </h4>
+                  <span className="badge-sku">CONSUMER STORE</span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {[
+                    {
+                      id: 'ret_loafers',
+                      name: 'Burnished Loafers (Italian Cut)',
+                      category: 'Footwear',
+                      cost: 24000,
+                      vendor: 'Stall #14B • Ariaria Cobblers',
+                      desc: 'Full-grain dyed leather with reinforced arch support. Hand-finished in Faulks corridor.'
+                    },
+                    {
+                      id: 'ret_kaftan',
+                      name: 'Bespoke Linen Kaftan Set',
+                      category: 'Fashion',
+                      cost: 18000,
+                      vendor: 'Tailor Emeka • Ariaria Zone 2',
+                      desc: 'Breathable geometric embroidered kaftan with tailored drawstring trousers.'
+                    },
+                    {
+                      id: 'ret_bag',
+                      name: 'Leather Messenger Bag',
+                      category: 'Accessories',
+                      cost: 28000,
+                      vendor: 'Kano Tanneries Annex Depot',
+                      desc: 'Dual-buckle saddle hide with dedicated tablet pouch. Water-resistant wax coat.'
+                    },
+                    {
+                      id: 'ret_slides',
+                      name: 'Double-Buckle Street Slides',
+                      category: 'Footwear',
+                      cost: 14000,
+                      vendor: 'Faulks Vulcanized Hub',
+                      desc: 'Anti-slip vulcanized crepe sole designed for wet asphalt and rainy season puddles.'
+                    }
+                  ].map(item => {
+                    const canAfford = (player.cash >= item.cost) || (player.restrictedBuckets.consumerIncome >= item.cost);
+                    return (
+                      <div 
+                        key={item.id}
+                        style={{
+                          background: 'var(--surface-low)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          padding: '10px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--on-surface)' }}>{item.name}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--primary)' }}>{item.vendor}</div>
+                          </div>
+                          <span className="font-mono" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--on-surface)' }}>
+                            ${item.cost.toLocaleString()}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--on-surface-muted)', lineHeight: 1.3 }}>
+                          {item.desc}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                          <span style={{ fontSize: '10px', color: 'var(--on-surface-subtle)' }}>
+                            Category: {item.category}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const success = purchaseRetailItem(item.name, item.cost, item.category);
+                              if (success) {
+                                setPurchaseFeedback(`Bought ${item.name}! Paid $${item.cost.toLocaleString()} from Consumer Income / Cash.`);
+                                setTimeout(() => setPurchaseFeedback(null), 3000);
+                              } else {
+                                setPurchaseFeedback(`Insufficient funds in Consumer Income or Cash for $${item.cost.toLocaleString()}.`);
+                                setTimeout(() => setPurchaseFeedback(null), 3000);
+                              }
+                            }}
+                            disabled={!canAfford}
+                            className="btn-primary"
+                            style={{
+                              padding: '5px 12px',
+                              fontSize: '11px',
+                              opacity: canAfford ? 1 : 0.4
+                            }}
+                          >
+                            Buy Item
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Aba Artisan Fashion Reviews */}
               <div className="tactile-card" style={{ padding: '12px' }}>
                 <h4 style={{ fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Aba Artisan Fashion Reviews
+                  Aba Artisan Fashion Reviews & Trust
                 </h4>
                 <div style={{ fontSize: '11px', color: 'var(--on-surface-muted)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ background: 'var(--surface-low)', padding: '8px', borderRadius: '4px' }}>
                     <div style={{ fontWeight: 700, color: 'var(--on-surface)' }}>Adaeze Nwosu • 5.0 ★</div>
                     <div>"The burnished leather loafers from Stall #14B lasted 6 months through rainy season without peeling. Authentic craft."</div>
+                  </div>
+                  <div style={{ background: 'var(--surface-low)', padding: '8px', borderRadius: '4px' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--on-surface)' }}>Chief Obioma • 4.8 ★</div>
+                    <div>"Emeka's bespoke linen kaftan made heads turn at the Eziama civic reception. World-class sewing from Ariaria."</div>
                   </div>
                 </div>
               </div>
@@ -699,103 +1016,42 @@ export const PhoneOverlay: React.FC = () => {
           )}
         </div>
 
-        {/* Docked Tactile OS Navigation Bar (Bottom 5 Buttons) */}
+        {/* Docked Tactile OS Navigation Bar (Bottom 6 Buttons) */}
         <div style={{
           background: '#0d0e11',
           borderTop: '1px solid var(--border)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          padding: '8px 4px'
+          gridTemplateColumns: 'repeat(6, 1fr)',
+          padding: '8px 2px'
         }}>
-          <button
-            onClick={() => setActivePhoneApp('messages')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: activePhoneApp === 'messages' ? 'var(--primary)' : 'var(--on-surface-muted)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '9px',
-              cursor: 'pointer'
-            }}
-          >
-            <MessageSquare size={16} />
-            <span>Chat</span>
-          </button>
-
-          <button
-            onClick={() => setActivePhoneApp('bank')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: activePhoneApp === 'bank' ? 'var(--primary)' : 'var(--on-surface-muted)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '9px',
-              cursor: 'pointer'
-            }}
-          >
-            <Landmark size={16} />
-            <span>Bank</span>
-          </button>
-
-          <button
-            onClick={() => setActivePhoneApp('planner')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: activePhoneApp === 'planner' ? 'var(--primary)' : 'var(--on-surface-muted)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '9px',
-              cursor: 'pointer'
-            }}
-          >
-            <BarChart3 size={16} />
-            <span>Planner</span>
-          </button>
-
-          <button
-            onClick={() => setActivePhoneApp('jobs')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: activePhoneApp === 'jobs' ? 'var(--primary)' : 'var(--on-surface-muted)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '9px',
-              cursor: 'pointer'
-            }}
-          >
-            <Briefcase size={16} />
-            <span>Work</span>
-          </button>
-
-          <button
-            onClick={() => setActivePhoneApp('lifestyle')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: activePhoneApp === 'lifestyle' ? 'var(--primary)' : 'var(--on-surface-muted)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2px',
-              fontSize: '9px',
-              cursor: 'pointer'
-            }}
-          >
-            <ShoppingBag size={16} />
-            <span>Civilian</span>
-          </button>
+          {([
+            { app: 'messages', icon: <MessageSquare size={15} />, label: 'Chat' },
+            { app: 'bank', icon: <Landmark size={15} />, label: 'Bank' },
+            { app: 'maps', icon: <MapPin size={15} />, label: 'Maps' },
+            { app: 'planner', icon: <BarChart3 size={15} />, label: 'Planner' },
+            { app: 'jobs', icon: <Briefcase size={15} />, label: 'Work' },
+            { app: 'lifestyle', icon: <ShoppingBag size={15} />, label: 'Life' },
+          ] as { app: typeof activePhoneApp; icon: React.ReactNode; label: string }[]).map(({ app, icon, label }) => (
+            <button
+              key={app}
+              onClick={() => setActivePhoneApp(app)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: activePhoneApp === app ? 'var(--primary)' : 'var(--on-surface-muted)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '2px',
+                fontSize: '8px',
+                cursor: 'pointer',
+                padding: '2px 0'
+              }}
+            >
+              {icon}
+              <span>{label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>

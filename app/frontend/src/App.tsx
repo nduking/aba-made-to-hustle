@@ -6,7 +6,8 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { RecoveryNetworkModal } from './components/RecoveryNetworkModal';
 import { WholesaleMarketModal } from './components/WholesaleMarketModal';
 import { ScenarioModal } from './components/ScenarioModal';
-import { UserPlus, Sparkles, Smartphone } from 'lucide-react';
+import { StarterHomeModal } from './components/StarterHomeModal';
+import { UserPlus, Sparkles, Smartphone, Home } from 'lucide-react';
 
 const GameShell: React.FC = () => {
   const { openModal, togglePhone } = useGame();
@@ -47,6 +48,15 @@ const GameShell: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button 
+            onClick={() => openModal('home')}
+            className="btn-secondary"
+            style={{ padding: '6px 12px', fontSize: '11px', gap: '5px' }}
+          >
+            <Home size={13} style={{ color: 'var(--primary)' }} />
+            <span>Starter Home (F03)</span>
+          </button>
+
+          <button 
             onClick={() => openModal('onboarding')}
             className="btn-secondary"
             style={{ padding: '6px 12px', fontSize: '11px', gap: '5px' }}
@@ -68,6 +78,7 @@ const GameShell: React.FC = () => {
       <RecoveryNetworkModal />
       <WholesaleMarketModal />
       <ScenarioModal />
+      <StarterHomeModal />
     </div>
   );
 };
